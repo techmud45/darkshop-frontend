@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  background: #0b0c10;
+  color: #e0e0e0;
+  font-family: 'Source Code Pro', monospace;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+button:hover {
+  transform: scale(1.03);
+  transition: all 0.2s ease-in-out;
+}

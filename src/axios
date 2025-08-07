@@ -1,0 +1,58 @@
+import axios from 'axios';
+import router from './router'; // Adjust path to your router
+
+const api = axios.create({
+  baseURL: '/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor - add auth token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor - handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const { status } = error.response || {};
+
+    // Handle unauthorized (401) errors
+    if (status === 401) {
+      localStorage.removeItem('token');
+      router.push({
+        path: '/login',
+        query: {
+          redirect: router.currentRoute.fullPath,
+          message: 'Session expired - please login again',
+        },
+      });
+    }
+
+    // Handle other common errors
+    if (status) {
+      const errorMessages = {
+        403: "You don't have permission for this action",
+        404: 'Resource not found',
+        500: 'Server error occurred',
+      };
+
+      if (errorMessages[status]) {
+        console.error(`API Error ${status}:`, errorMessages[status]);
+      }
+    } else if (error.message === 'Network Error') {
+      console.error('Network Error: Please check your internet connection');
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;

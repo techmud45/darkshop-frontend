@@ -1,0 +1,281 @@
+/* Base Terminal Styling */
+:root {
+  --terminal-primary: #00ff41; /* Matrix green */
+  --terminal-bg: #0a0a0a;
+  --terminal-text: #e0e0e0;
+  --terminal-error: #ff4444;
+  --terminal-warning: #ffcc00;
+  --terminal-info: #00a8ff;
+  --terminal-glitch: 0;
+  --terminal-scanline: 0.3;
+}
+
+/* Terminal Themes */
+[data-terminal-theme='orders'] {
+  --terminal-primary: #00a8ff;
+  --terminal-scanline: 0.2;
+}
+
+[data-terminal-theme='inventory'] {
+  --terminal-primary: #fbc531;
+  --terminal-scanline: 0.4;
+}
+
+[data-terminal-theme='crypto'] {
+  --terminal-primary: #9c88ff;
+  --terminal-scanline: 0.5;
+}
+
+/* Core Styles */
+body {
+  margin: 0;
+  background-color: var(--terminal-bg);
+  color: var(--terminal-text);
+  font-family: 'Courier New', monospace, system-ui;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Scanline Effect */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 95%, rgba(0, 255, 65, 0.05) 96%);
+  background-size: 100% 0.5rem;
+  pointer-events: none;
+  opacity: var(--terminal-scanline);
+  z-index: 1000;
+}
+
+/* Glitch Effect */
+.glitched {
+  position: relative;
+}
+.glitched::before {
+  content: attr(data-text);
+  position: absolute;
+  left: -2px;
+  text-shadow: 2px 0 #ff00ff;
+  clip: rect(0, 900px, 0, 0);
+  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+.glitched::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  text-shadow: -2px 0 #00ffff;
+  clip: rect(0, 900px, 0, 0);
+  animation: glitch-anim-2 2s infinite linear alternate-reverse;
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+  color: var(--terminal-primary);
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+  letter-spacing: 1px;
+}
+
+a {
+  color: var(--terminal-primary);
+  text-decoration: none;
+  position: relative;
+}
+a:hover {
+  text-shadow: 0 0 10px var(--terminal-primary);
+}
+a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--terminal-primary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+a:hover::after {
+  transform: scaleX(1);
+}
+
+/* Buttons & Inputs */
+button,
+.btn {
+  background: transparent;
+  color: var(--terminal-primary);
+  border: 1px solid var(--terminal-primary);
+  padding: 0.5rem 1.5rem;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+button:hover,
+.btn:hover {
+  box-shadow: 0 0 10px var(--terminal-primary);
+  text-shadow: 0 0 5px var(--terminal-primary);
+}
+button::before,
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+  transition: 0.5s;
+}
+button:hover::before,
+.btn:hover::before {
+  left: 100%;
+}
+
+input,
+textarea,
+select {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid #333;
+  color: var(--terminal-primary);
+  padding: 0.5rem;
+  font-family: inherit;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--terminal-primary);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+/* Layout */
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+}
+
+.terminal-container {
+  border: 1px solid #333;
+  background: rgba(10, 10, 10, 0.7);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+.terminal-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to right, #ff4444, #ffcc00, #00ff41);
+  opacity: 0.1;
+}
+
+/* Animations */
+@keyframes glitch-anim-1 {
+  0% {
+    clip: rect(10px, 900px, 80px, 0);
+  }
+  20% {
+    clip: rect(20px, 900px, 30px, 0);
+  }
+  40% {
+    clip: rect(50px, 900px, 60px, 0);
+  }
+  60% {
+    clip: rect(30px, 900px, 70px, 0);
+  }
+  80% {
+    clip: rect(40px, 900px, 20px, 0);
+  }
+  100% {
+    clip: rect(70px, 900px, 50px, 0);
+  }
+}
+
+@keyframes glitch-anim-2 {
+  0% {
+    clip: rect(30px, 900px, 90px, 0);
+  }
+  20% {
+    clip: rect(50px, 900px, 10px, 0);
+  }
+  40% {
+    clip: rect(10px, 900px, 40px, 0);
+  }
+  60% {
+    clip: rect(80px, 900px, 30px, 0);
+  }
+  80% {
+    clip: rect(60px, 900px, 70px, 0);
+  }
+  100% {
+    clip: rect(20px, 900px, 10px, 0);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  19.999%,
+  22%,
+  62.999%,
+  64%,
+  64.999%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  21.999%,
+  63%,
+  63.999%,
+  65%,
+  69.999% {
+    opacity: 0.4;
+  }
+}
+
+/* Utility Classes */
+.text-primary {
+  color: var(--terminal-primary);
+}
+.text-error {
+  color: var(--terminal-error);
+}
+.text-warning {
+  color: var(--terminal-warning);
+}
+
+.bg-terminal {
+  background: var(--terminal-bg);
+}
+
+.border-terminal {
+  border: 1px solid var(--terminal-primary);
+}
+
+.flicker {
+  animation: flicker 3s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #app {
+    padding: 1rem;
+  }
+
+  body::after {
+    background-size: 100% 0.3rem;
+  }
+}
