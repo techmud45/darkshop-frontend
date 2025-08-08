@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import axios from 'axios';
+import api from '../axios';
 
 export const usePaymentStore = defineStore('payment', () => {
   const invoice = ref(null);
@@ -12,8 +12,8 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = null;
 
     try {
-      const response = await axios.post(
-        '/api/payments/create',
+      const response = await api.post(
+        '/payments/create',
         {
           items: cartItems,
         },
@@ -33,7 +33,7 @@ export const usePaymentStore = defineStore('payment', () => {
 
   const checkStatus = async (invoiceId) => {
     try {
-      const { data } = await axios.get(`/api/payments/status/${invoiceId}`);
+      const { data } = await api.get(`/payments/status/${invoiceId}`);
       return data.paid;
     } catch (err) {
       console.error('Status check failed:', err);
