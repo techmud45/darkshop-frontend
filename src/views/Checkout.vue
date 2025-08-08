@@ -48,7 +48,12 @@
   const payment = usePaymentStore();
 
   const initiatePayment = async () => {
-    await payment.createInvoice(cart.items);
+    const items = cart.items.map(item => ({
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity
+    }));
+    await payment.createInvoice(items);
   };
 
   const formatExpiry = (timestamp) => {
