@@ -101,6 +101,13 @@ const routes = [
       layout: 'DarkLayout', // If you have a special layout for dark web pages
     },
   },
+
+  // 404 catch-all route (must be last)
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFound.vue'),
+  },
 ];
 
 const router = createRouter({
