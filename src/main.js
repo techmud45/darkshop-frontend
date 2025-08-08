@@ -5,7 +5,9 @@ import router from './router';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import '@fortawesome/fontawesome-free/css/all.css';
-import api from './api/api'; // Import the API instance
+
+// ✅ Use the single axios instance from src/axios.js
+import api from './axios'; 
 
 import './assets/main.css';
 
@@ -14,7 +16,7 @@ const pinia = createPinia();
 
 pinia.use(piniaPluginPersistedstate);
 
-// Provide API instance globally
+// Provide Axios globally so components can use inject('api')
 app.provide('api', api);
 
 app.use(pinia);
