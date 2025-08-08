@@ -167,7 +167,7 @@
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('/products');
+      const res = await axios.get('/products'); // <-- fixed: remove extra /api
       products.value = res.data;
     } catch (err) {
       console.error('PRODUCT LOAD FAILURE:', err);
