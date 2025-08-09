@@ -28,6 +28,81 @@
       </div>
 
       <div v-else-if="user" class="account-data">
+        <!-- User Profile Section -->
+        <div class="data-section">
+          <div class="section-header">
+            <i class="fas fa-user"></i>
+            <h3>USER_PROFILE</h3>
+          </div>
+          <div class="profile-info">
+            <div class="info-row"><span class="info-label">USERNAME:</span> <span class="info-value">{{ user.username }}</span></div>
+            <div class="info-row"><span class="info-label">EMAIL:</span> <span class="info-value">{{ user.email }}</span></div>
+          </div>
+          <button class="cyber-button" @click="showProfileEdit = true"><i class="fas fa-edit"></i><span>EDIT_PROFILE</span></button>
+          <button class="cyber-button confirm-btn" @click="showChangePassword = true"><i class="fas fa-key"></i><span>CHANGE_PASSWORD</span></button>
+          <button class="cyber-button wallet-btn" @click="showForgotPassword = true"><i class="fas fa-unlock-alt"></i><span>FORGOT_PASSWORD</span></button>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div v-if="showProfileEdit" class="crypto-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4><i class="fas fa-user-edit"></i> EDIT_PROFILE</h4>
+              <button @click="showProfileEdit = false" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="input-group">
+              <label>USERNAME:</label>
+              <input v-model="editUsername" class="cyber-input" />
+            </div>
+            <div class="input-group">
+              <label>EMAIL:</label>
+              <input v-model="editEmail" class="cyber-input" />
+            </div>
+            <button class="cyber-button confirm-btn" @click="updateProfile"><i class="fas fa-save"></i><span>SAVE_CHANGES</span></button>
+            <div v-if="profileMsg" :class="{'error-line': profileMsgType==='error', 'success-line': profileMsgType==='success'}">{{ profileMsg }}</div>
+          </div>
+        </div>
+
+        <!-- Change Password Modal -->
+        <div v-if="showChangePassword" class="crypto-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4><i class="fas fa-key"></i> CHANGE_PASSWORD</h4>
+              <button @click="showChangePassword = false" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="input-group">
+              <label>CURRENT PASSWORD:</label>
+              <input v-model="currentPassword" type="password" class="cyber-input" />
+            </div>
+            <div class="input-group">
+              <label>NEW PASSWORD:</label>
+              <input v-model="newPassword" type="password" class="cyber-input" />
+            </div>
+            <div class="input-group">
+              <label>CONFIRM NEW PASSWORD:</label>
+              <input v-model="confirmPassword" type="password" class="cyber-input" />
+            </div>
+            <button class="cyber-button confirm-btn" @click="changePassword"><i class="fas fa-check-circle"></i><span>UPDATE_PASSWORD</span></button>
+            <div v-if="passwordMsg" :class="{'error-line': passwordMsgType==='error', 'success-line': passwordMsgType==='success'}">{{ passwordMsg }}</div>
+          </div>
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div v-if="showForgotPassword" class="crypto-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4><i class="fas fa-unlock-alt"></i> PASSWORD_RESET</h4>
+              <button @click="showForgotPassword = false" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="input-group">
+              <label>EMAIL:</label>
+              <input v-model="resetEmail" class="cyber-input" />
+            </div>
+            <button class="cyber-button confirm-btn" @click="requestPasswordReset"><i class="fas fa-envelope"></i><span>SEND_RESET_LINK</span></button>
+            <div v-if="resetMsg" :class="{'error-line': resetMsgType==='error', 'success-line': resetMsgType==='success'}">{{ resetMsg }}</div>
+          </div>
+        </div>
+
         <!-- Balance Section -->
         <div class="data-section">
           <div class="section-header">
@@ -149,6 +224,21 @@ const invoice = ref(null);
 const topupStatus = ref('');
 const torActive = ref(true);
 const menuOpen = ref(false);
+const showProfileEdit = ref(false);
+const showChangePassword = ref(false);
+const showForgotPassword = ref(false);
+const editUsername = ref('');
+const editEmail = ref('');
+const profileMsg = ref('');
+const profileMsgType = ref('');
+const currentPassword = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
+const passwordMsg = ref('');
+const passwordMsgType = ref('');
+const resetEmail = ref('');
+const resetMsg = ref('');
+const resetMsgType = ref('');
 let pollInterval = null;
 
 // Computed
@@ -245,7 +335,65 @@ const getLoaderStyle = (n) => {
   };
 };
 
-onMounted(fetchAccount);
+// Profile Edit
+const updateProfile = async () => {
+  profileMsg.value = '';
+  profileMsgType.value = '';
+  try {
+    const res = await api.put('/auth/me', { username: editUsername.value, email: editEmail.value });
+    user.value.username = editUsername.value;
+    user.value.email = editEmail.value;
+    profileMsg.value = 'Profile updated successfully!';
+    profileMsgType.value = 'success';
+    setTimeout(() => { showProfileEdit.value = false; profileMsg.value = ''; }, 1500);
+  } catch (err) {
+    profileMsg.value = err.response?.data?.error || 'Update failed';
+    profileMsgType.value = 'error';
+  }
+};
+
+// Change Password
+const changePassword = async () => {
+  passwordMsg.value = '';
+  passwordMsgType.value = '';
+  if (newPassword.value !== confirmPassword.value) {
+    passwordMsg.value = 'Passwords do not match';
+    passwordMsgType.value = 'error';
+    return;
+  }
+  try {
+    await api.post('/auth/change-password', { currentPassword: currentPassword.value, newPassword: newPassword.value });
+    passwordMsg.value = 'Password changed successfully!';
+    passwordMsgType.value = 'success';
+    setTimeout(() => { showChangePassword.value = false; passwordMsg.value = ''; }, 1500);
+    currentPassword.value = newPassword.value = confirmPassword.value = '';
+  } catch (err) {
+    passwordMsg.value = err.response?.data?.error || 'Password change failed';
+    passwordMsgType.value = 'error';
+  }
+};
+
+// Forgot Password
+const requestPasswordReset = async () => {
+  resetMsg.value = '';
+  resetMsgType.value = '';
+  try {
+    await api.post('/auth/forgot-password', { email: resetEmail.value });
+    resetMsg.value = 'Reset link sent! Check your email.';
+    resetMsgType.value = 'success';
+    setTimeout(() => { showForgotPassword.value = false; resetMsg.value = ''; }, 2000);
+  } catch (err) {
+    resetMsg.value = err.response?.data?.error || 'Reset failed';
+    resetMsgType.value = 'error';
+  }
+};
+
+onMounted(() => {
+  fetchAccount();
+  // Pre-fill profile edit fields
+  editUsername.value = user.value.username;
+  editEmail.value = user.value.email;
+});
 </script>
 
 <style scoped>
