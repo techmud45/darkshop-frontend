@@ -57,11 +57,14 @@
           <label>CRYPTO_KEY</label>
           <input
             v-model="password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             required
             class="secure-input"
             @input="checkPasswordStrength"
           />
+          <span class="toggle-password" @click="showPassword = !showPassword">
+            <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </span>
           <div class="input-decoration"></div>
           <div class="password-strength-container">
             <div class="password-strength" :class="strengthClass"></div>
@@ -120,6 +123,7 @@
   const username = ref('');
   const email = ref('');
   const password = ref('');
+  const showPassword = ref(false);
   const error = ref('');
   const loading = ref(false);
   const termsAccepted = ref(false);
@@ -697,5 +701,15 @@
     .access-title {
       font-size: 1.2rem;
     }
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #00ff41;
+    z-index: 2;
   }
 </style>

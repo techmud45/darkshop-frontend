@@ -127,19 +127,19 @@
     </div>
 
     <!-- Description Modal -->
-    <div v-if="modalProduct" class="description-modal" @click.self="closeDescriptionModal">
+    <div v-if="selectedProduct" class="description-modal" @click.self="closeDescriptionModal">
       <div class="modal-content cyber-panel">
         <div class="modal-header">
-          <h3>{{ modalProduct.name }}</h3>
+          <h3>{{ selectedProduct.name }}</h3>
           <button @click="closeDescriptionModal" class="modal-close" aria-label="Close">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
-          <p>{{ modalProduct.description }}</p>
+          <p>{{ selectedProduct.description }}</p>
         </div>
         <div class="modal-footer">
-          <span class="product-id">ID: {{ modalProduct._id.slice(-6) }}</span>
+          <span class="product-id">ID: {{ selectedProduct._id.slice(-6) }}</span>
           <button @click="closeDescriptionModal" class="cyber-button">Close</button>
         </div>
       </div>
@@ -148,7 +148,7 @@
 </template>
 
 <script setup>
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, nextTick } from 'vue';
   import axios from '../axios';
   import { useCartStore } from '../stores/cart';
   import { useRouter } from 'vue-router';
@@ -159,7 +159,6 @@
   const search = ref('');
   const cart = useCartStore();
   const selectedProduct = ref(null); // ✅ properly initialized as ref(null)
-  const modalProduct = computed(() => selectedProduct.value || null);
 
   const itemsInCart = computed(() => cart.items.reduce((total, item) => total + item.quantity, 0));
 
@@ -234,9 +233,9 @@
     selectedProduct.value = product;
   };
 
-  const closeDescriptionModal = () => {
-    console.log('MODAL CLOSE');
+  const closeDescriptionModal = async () => {
     selectedProduct.value = null;
+    await nextTick(); // Ensure reactivity flush
   };
 </script>
 
@@ -702,15 +701,77 @@
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(11, 12, 16, 0.9);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
-    animation: fadeIn 0.3s ease;
+    transition: opacity 0.2s;
+  }
+
+  .modal-content {
+    background: #181c22;
+    border: 2px solid #66fcf1;
+    border-radius: 8px;
+    box-shadow: 0 0 30px #66fcf180;
+    max-width: 95vw;
+    width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 10000;
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: #66fcf1;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    transition: color 0.2s;
+    z-index: 10001;
+  }
+
+  .modal-close:hover {
+    color: #ff5a5a;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 1.2rem;
+    gap: 1rem;
+  }
+
+  .modal-footer .cyber-button {
+    min-width: 90px;
+    z-index: 10002;
+    pointer-events: auto;
+  }
+
+  @media (max-width: 600px) {
+    .modal-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.7rem;
+    }
+
+    .modal-footer .cyber-button {
+      width: 100%;
+      min-width: unset;
+    }
   }
 
   @keyframes fadeIn {
@@ -722,19 +783,6 @@
     }
   }
 
-  .modal-content {
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    background: #1f2833;
-    border: 1px solid #45a29e;
-    box-shadow: 0 0 30px rgba(102, 252, 241, 0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideUp 0.3s ease;
-  }
-
   @keyframes slideUp {
     from {
       transform: translateY(20px);
@@ -744,61 +792,6 @@
       transform: translateY(0);
       opacity: 1;
     }
-  }
-
-  .modal-header {
-    padding: 1rem 1.5rem;
-    background: rgba(31, 40, 51, 0.8);
-    border-bottom: 1px solid #45a29e;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-header h3 {
-    color: #66fcf1;
-    margin: 0;
-    font-size: 1.2rem;
-  }
-
-  .modal-close {
-    background: transparent;
-    border: none;
-    color: #c5c6c7;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .modal-close:hover {
-    color: #ff5555;
-    transform: rotate(90deg);
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex-grow: 1;
-    line-height: 1.6;
-  }
-
-  .modal-body p {
-    white-space: pre-line;
-  }
-
-  .modal-footer {
-    padding: 1rem 1.5rem;
-    background: rgba(31, 40, 51, 0.8);
-    border-top: 1px solid #45a29e;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-footer .product-id {
-    font-size: 0.8rem;
-    color: #66fcf1;
-    opacity: 0.7;
   }
 
   /* === MOBILE RESPONSIVE STYLES === */

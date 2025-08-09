@@ -160,102 +160,6 @@
         </div>
       </div>
     </section>
-
-    <!-- CRYPTO TAB -->
-    <section v-else class="cyber-panel fade-in">
-      <h3 class="section-title"><i class="fas fa-coins"></i> CRYPTO ADDRESS MANAGEMENT</h3>
-      <div v-if="loadingCrypto" class="loading-indicator">
-        <div class="pulse-dot"></div>
-        <div class="pulse-dot"></div>
-        <div class="pulse-dot"></div>
-      </div>
-      <div v-else>
-        <div v-if="cryptoAddresses.length === 0" class="empty-state">
-          <i class="fas fa-wallet"></i>
-          <p>No crypto addresses found</p>
-        </div>
-        <div v-else class="table-responsive">
-          <table class="cyber-table">
-            <thead>
-              <tr>
-                <th>CURRENCY</th>
-                <th>ADDRESS</th>
-                <th>STATUS</th>
-                <th>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="address in cryptoAddresses" :key="address._id">
-                <td>{{ address.currency }}</td>
-                <td class="font-monospace">{{ address.address }}</td>
-                <td>
-                  <span :class="{ active: address.isActive, inactive: !address.isActive }">
-                    {{ address.isActive ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-                <td>
-                  <button
-                    @click="toggleAddressStatus(address)"
-                    class="cyber-btn"
-                    :class="address.isActive ? '' : 'secondary'"
-                  >
-                    <i :class="address.isActive ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"></i>
-                  </button>
-                  <button @click="copyToClipboard(address.address)" class="cyber-btn">
-                    <i class="fas fa-copy"></i>
-                  </button>
-                  <button @click="confirmDelete(address)" class="cyber-btn danger">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <button @click="showCryptoModal = true" class="cyber-btn neon">
-          <i class="fas fa-plus"></i> Add Address
-        </button>
-      </div>
-      <!-- Add Crypto Modal -->
-      <div v-if="showCryptoModal" class="modal-overlay" @click.self="showCryptoModal = false">
-        <div class="modal-content cyber-panel">
-          <h4 class="modal-title"><i class="fas fa-plus-circle"></i> Add Crypto Address</h4>
-          <div class="modal-body">
-            <div class="form-group">
-              <label>CURRENCY</label>
-              <select v-model="newAddress.currency" class="cyber-input">
-                <option value="">Select currency</option>
-                <option value="BTC">Bitcoin</option>
-                <option value="ETH">Ethereum</option>
-                <option value="USDT">Tether</option>
-                <option value="LTC">Litecoin</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>ADDRESS</label>
-              <input
-                v-model="newAddress.address"
-                class="cyber-input"
-                placeholder="Wallet address"
-              />
-            </div>
-            <div class="form-group">
-              <label>PRIVATE KEY (optional)</label>
-              <input
-                v-model="newAddress.privateKey"
-                class="cyber-input"
-                placeholder="Encrypted key"
-                type="password"
-              />
-            </div>
-          </div>
-          <div class="modal-actions">
-            <button @click="showCryptoModal = false" class="cyber-btn">Cancel</button>
-            <button @click="handleAddAddress" class="cyber-btn neon">Save</button>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -270,7 +174,6 @@
   const tabs = [
     { value: 'orders', label: 'Orders', icon: 'fas fa-clipboard-list' },
     { value: 'products', label: 'Products', icon: 'fas fa-boxes' },
-    { value: 'crypto', label: 'Crypto', icon: 'fas fa-coins' },
   ];
   const activeTab = ref('orders');
 
@@ -280,7 +183,12 @@
   const fetchOrders = async () => {
     loadingOrders.value = true;
     try {
-      orders.value = (await axios.get('/orders')).data;
+      const response = await axios.get('/orders');
+      orders.value = response.data.orders; // Use the array from the response
+      // Optionally, store pagination info if needed:
+      // totalPages.value = response.data.totalPages;
+      // currentPage.value = response.data.currentPage;
+      // totalOrders.value = response.data.totalOrders;
     } catch (e) {
       toast.error('Failed to load orders');
     }
@@ -374,61 +282,9 @@
     };
   };
 
-  // Crypto
-  const cryptoAddresses = ref([]);
-  const loadingCrypto = ref(true);
-  const showCryptoModal = ref(false);
-  const newAddress = ref({ currency: '', address: '', privateKey: '' });
-  const fetchCryptoAddresses = async () => {
-    loadingCrypto.value = true;
-    try {
-      cryptoAddresses.value = (await axios.get('/crypto-addresses')).data;
-    } catch (e) {
-      toast.error('Failed to load addresses');
-    }
-    loadingCrypto.value = false;
-  };
-  const handleAddAddress = async () => {
-    try {
-      const res = await axios.post('/crypto-addresses', newAddress.value);
-      cryptoAddresses.value.unshift(res.data);
-      showCryptoModal.value = false;
-      newAddress.value = { currency: '', address: '', privateKey: '' };
-      toast.success('Address added');
-    } catch (e) {
-      toast.error('Failed to add address');
-    }
-  };
-  const toggleAddressStatus = async (address) => {
-    try {
-      await axios.put(`/crypto-addresses/${address._id}/status`, { isActive: !address.isActive });
-      address.isActive = !address.isActive;
-      toast.success('Status updated');
-    } catch (e) {
-      toast.error('Update failed');
-    }
-  };
-  const confirmDelete = (address) => {
-    if (confirm('Delete this address?')) deleteAddress(address);
-  };
-  const deleteAddress = async (address) => {
-    try {
-      await axios.delete(`/crypto-addresses/${address._id}`);
-      fetchCryptoAddresses();
-      toast.success('Deleted');
-    } catch (e) {
-      toast.error('Delete failed');
-    }
-  };
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied!');
-  };
-
   onMounted(() => {
     fetchOrders();
     fetchProducts();
-    fetchCryptoAddresses();
   });
 </script>
 
@@ -875,13 +731,56 @@
     }
     .modal-content {
       padding: 1rem 0.2rem !important;
+      max-width: 98vw;
     }
     .glitch {
       font-size: 1.18rem;
     }
     .cyber-table th,
     .cyber-table td {
-      font-size: 0.97rem;
+      padding: 0.5rem 0.3rem !important;
+      font-size: 0.92rem !important;
+    }
+    .cyber-table td:before {
+      min-width: 80px;
+      font-size: 0.85rem;
+    }
+    .cyber-btn {
+      padding: 0.5rem 0.7rem;
+      font-size: 0.8rem;
+    }
+    .modal-title {
+      font-size: 0.95rem;
+    }
+    .section-title {
+      font-size: 1rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+    }
+    .cyber-input,
+    select.cyber-input,
+    textarea.cyber-input {
+      font-size: 0.92rem;
+      padding: 0.5rem;
+    }
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .cyber-tabs {
+      flex-direction: column;
+      gap: 0;
+    }
+    .cyber-tabs button {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #2a5e60;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.95rem;
+    }
+    .cyber-tabs button:last-child {
+      border-bottom: none;
     }
   }
 </style>

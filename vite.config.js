@@ -11,13 +11,12 @@ export default defineConfig({
   },
   server: {
     host: '127.0.0.1',
-    port: 5173, // Vite dev server port
+    port: 5174, // Updated Vite dev server port
     allowedHosts: [
       '127.0.0.1',
       'localhost',
       's2dqyy4dtfikvaeibyez3udfip5ytoqcxs6v4dxgsufmcn25jzr2txad.onion',
     ],
-
     proxy: {
       // Redirect /api calls to your backend
       '/api': {
