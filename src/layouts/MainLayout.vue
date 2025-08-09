@@ -39,6 +39,7 @@
           <router-link to="/cart">CART</router-link>
           <router-link to="/checkout">CHECKOUT</router-link>
           <router-link to="/login">LOGIN</router-link>
+          <router-link to="/account">ACCOUNT</router-link>
         </nav>
 
         <!-- TOR Status -->
@@ -62,6 +63,7 @@
           <router-link to="/cart" @click.native="toggleMenu">CART</router-link>
           <router-link to="/checkout" @click.native="toggleMenu">CHECKOUT</router-link>
           <router-link to="/login" @click.native="toggleMenu">LOGIN</router-link>
+          <router-link to="/account" @click.native="toggleMenu">ACCOUNT</router-link>
         </nav>
       </transition>
     </header>
@@ -74,6 +76,7 @@
         <li><router-link to="/cart" @click="closeMenu">Cart</router-link></li>
         <li><router-link to="/checkout" @click="closeMenu">Checkout</router-link></li>
         <li><router-link to="/login" @click="closeMenu">Login</router-link></li>
+        <li><router-link to="/account" @click="closeMenu">Account</router-link></li>
       </ul>
     </nav>
 

@@ -10,6 +10,7 @@ export const useUserStore = defineStore('user', {
       this.token = data.token;
       this.user = data.user;
       localStorage.setItem('token', data.token);
+      console.log('[Pinia] Login: token set', data.token);
     },
     logout() {
       this.token = null;
